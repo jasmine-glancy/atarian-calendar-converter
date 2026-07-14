@@ -1,6 +1,7 @@
 """Processes the time functions and date formatting"""
 
 from datetime import datetime
+import pandas as pd
 
 # TODO: Output next Atarian holiday +/- real world holiday
 
@@ -9,10 +10,97 @@ class AtarianConverter:
     def __init__(self, gregorian_date_string):
         """Cleans input dates"""
         
-        date_format = "%m/%d/%Y"
+        self.date_format = "%Y-%m-%d"
 
         # Convert string to datetime object
-        self.datetime_object = datetime.strptime(gregorian_date_string, date_format)
+        self.datetime_object = datetime.strptime(gregorian_date_string, self.date_format)
+        
+    def extract_world_calendar(self):
+        """Using pandas, extract the Date and End Dates"""
+        
+        # Read the world events
+        dataframe = pd.read_csv('world_calendar.csv', usecols=['Label', 'Date', 'End Date', 'Duration'])
+    
+        return dataframe
+    
+    def _normalize_date_value(self, value):
+        """Normalize a single date value into a consistent dictionary."""
+        if value is None or (isinstance(value, float) and pd.isna(value)) or (
+            isinstance(value, str) and str(value).strip() == ""
+        ):
+            return {
+                "Era": None,
+                "Year": None,
+                "Month": None,
+                "Day": None,
+                "Greenseat Year": None,
+            }
+
+        value = str(value).strip()
+        era = "BC" if "BC" in value else "AD"
+        cleaned_value = value.replace("BC", "").strip()
+
+        if not cleaned_value:
+            return {
+                "Era": era,
+                "Year": None,
+                "Month": None,
+                "Day": None,
+                "Greenseat Year": None,
+            }
+
+        cleaned_value = cleaned_value.split()[0]
+        date_parts = cleaned_value.split("-")
+
+        year = None
+        month = 1
+        day = 1
+
+        if len(date_parts) > 0 and date_parts[0]:
+            year = int(date_parts[0])
+
+        if len(date_parts) > 1 and date_parts[1]:
+            month = int(date_parts[1])
+
+        if len(date_parts) > 2 and date_parts[2]:
+            day = int(date_parts[2])
+
+        return {
+            "Era": era,
+            "Year": year,
+            "Month": month,
+            "Day": day,
+            "Greenseat Year": -year if era == "BC" and year is not None else year,
+        }
+
+    def clean_world_dates(self, data):
+        """Normalize date values from a string, pandas Series, or DataFrame column."""
+        
+        # If the data is a Pandas data, continue to process it
+        if isinstance(data, pd.DataFrame):
+            
+            # Make a copy of the dataframe
+            normalized = data.copy()
+            
+            # Processes both start and end dates
+            for column in ("Date", "End Date"):
+                if column in normalized.columns:
+                    normalized_series = normalized[column].apply(self._normalize_date_value)
+                    normalized = pd.concat(
+                        [
+                            normalized.reset_index(drop=True),
+                            pd.json_normalize(normalized_series).add_prefix(
+                                f"{column.lower().replace(' ', '_')}_"
+                            ),
+                        ],
+                        axis=1,
+                    )
+            return normalized
+
+        if isinstance(data, pd.Series):
+            return data.apply(self._normalize_date_value)
+
+        return self._normalize_date_value(data) 
 
     def determine_day(self):
         """Extracts the day chosen by the user"""
@@ -49,7 +137,6 @@ class AtarianConverter:
         elif int(self.month) in (5, 8, 11, 2):
             return 3
 
-    # TODO: Determine Guardianship era
     def number_suffix(self, number):
         """Code recommended by Google Copilot"""
         
@@ -83,15 +170,132 @@ class AtarianConverter:
     def determine_year(self):
         """Pulls the entered year"""
         
+        # Finds the year the user chose
         self.year = self.datetime_object.year
         
         return self.year
+    
+    def find_guardian_era(self, entered_date, dataframe):
+        """Based on the user's entered year, finds the guardian of Ataria for that year"""
+        
+        try:
+            # 1. Find the user's entered year
+            user_greenseat_year = entered_date["Greenseat Year"]
+            
+            # 2. Filter rows where the user's year falls between the start and end columns
+            mask = (
+                (dataframe["Label"].str.contains("Guardian", case=False, na=False)) &
+                (dataframe["Start Year"] <= user_greenseat_year) &
+                (dataframe["End Year"] >= user_greenseat_year)
+            )
+
+            matched_rows = dataframe.loc[mask]
+
+            # 3. Process matches
+            if not matched_rows.empty:
+                # If matched_rows isn't empty, find and clean the first value
+                try:
+                    guardian_label = matched_rows["Label"].iloc[0]
+                    
+                    # Picks "High Chieftain Riel" out of "High Chieftain Riel's Guardianship"
+                    full_guardian_name = guardian_label.split("'")
+                    
+                    deconstructed_guardian_name = full_guardian_name[0].split(" ")
+                    print(f"Guardian: {deconstructed_guardian_name[2]}")
+                    
+                    guardian_era = f"Guardianship of {deconstructed_guardian_name[2].title()}"
+                    
+                    print(f"This is the {guardian_era}!")
+                    return guardian_era
+                except Exception as e:
+                    print(f"Can't extract Guardian name. Exception: {e}")
+                
+            
+        except Exception as e:
+            print(f"Can't find Guardian era. Exception: {e}")
+
+    def find_guardian_year(self, entered_date, dataframe):
+        """Return the ordinal year within the matched guardian's guardianship."""
+        
+        print(f"Entered date: {entered_date}")
+        try:
+            
+            if dataframe is None:
+                print("The Dataframe is empty!")
+                return None
+            
+            
+            # 1. Find the user's entered year
+            user_greenseat_year = entered_date["Greenseat Year"]
+            
+            # 2. Filter rows where the user's year falls between the start and end columns
+            mask = (
+                dataframe["Label"].str.contains("Guardian", case=False, na=False)
+                & (dataframe["Start Year"] <= user_greenseat_year)
+                & (dataframe["End Year"] >= user_greenseat_year)
+            )
+
+            matched_rows = dataframe.loc[mask]
+            
+            # If the guardian year is before 105-10-15, then output "pre-guardianship"
+            if entered_date["Greenseat Year"] <= 105 and entered_date["Month"] <= 10 and entered_date["Day"] <= 14:
+                return "Before the Guardians"
+            
+        
+            # If the matched rows aren't empty and we are able to pull
+            start_year = matched_rows["Start Year"].iloc[0]
+            if matched_rows.empty or pd.isna(start_year):
+                return None
+            
+            
+            # 3. Process matches
+            if not matched_rows.empty:
+                
+                print(matched_rows[["Label", "Start Year", "End Year"]])
+            
+                
+                # Get the current Guardian year based on the date the user entered
+                ## For example, If given the year 05-21-114, it should read Month 3 of the 9th Blooming Season 
+                
+                try:
+                    
+                    print(f"Start Year: {start_year}")
+                    start_year = int(start_year)
+                    
+                    # Find the difference between the user's Greenseat year and the start 
+                        # year of the person who guards Ataria
+                    guardian_year = user_greenseat_year - start_year
+                    
+                    # print(f"This is during the {guardian_year} guardian year")
+                    
+                    return guardian_year
+                    
+                except Exception as e:
+                    print(f"Found matches, but can't find Guardian year. Exception: {e}")
+                    return None  
+                           
+        except Exception as e:
+            print(f"Can't find Guardian year. Exception: {e}")
+            return None      
+                  
+    def format_chapter_head_date(self, month, season, guardian, guardian_year, parsed_user_date):
+        """Formats the final string"""
+        try:
+            # Output example: Day 24, Burning Season Month 3 of the 131st Greenseat season cycle (8/24)
+            
+            if guardian_year == "Before the Guardians":
+                return f"{guardian_year}, Month {month} of the {self.number_suffix(parsed_user_date["Greenseat Year"])} {season} ({self.month}/{self.day})"
+            else:    
+                return f"{guardian}, Month {month} of the {self.number_suffix(number=guardian_year)} {season} ({self.month}/{self.day})"
+
+        except Exception as e:
+            print(f"Please choose a different date. Exception: {e}")
              
     def format_date(self, day, month, season, year):
         """Formats the final string"""
         try:
             # Output example: Day 24, Burning Season Month 3 of the 131st Greenseat season cycle (8/24)
-            print(f"Day {day}, {season} Month {month} of the {self.number_suffix(number=year)} Greenseat season cycle ({self.month}/{self.day})")
+            return f"Day {day}, {season} Month {month} of the {self.number_suffix(number=year)} Greenseat season cycle ({self.month}/{self.day})"
 
         except Exception as e:
-            print(f"Please choose a different date. Exception: {e}")
+            print(f"Can't format the date. Please choose a different date. Exception: {e}")
