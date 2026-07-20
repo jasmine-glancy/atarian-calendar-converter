@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "sun_sign": "Aries",
+    "start_month": 3,
+    "start_day": 21,
+    "end_month": 4,
+    "end_day": 19,
+    "element": "Fire",
+    "traits": "energetic, courageous, impulsive"
+  },
+  {
+    "id": 2,
+    "sun_sign": "Taurus",
+    "start_month": 4,
+    "start_day": 20,
+    "end_month": 5,
+    "end_day": 20,
+    "element": "Earth",
+    "traits": "reliable, practical, stubborn"
+  },
+  {
+    "id": 3,
+    "sun_sign": "Gemini",
+    "start_month": 5,
+    "start_day": 21,
+    "end_month": 6,
+    "end_day": 21,
+    "element": "Air",
+    "traits": "curious, quick-witted, inconsistent"
+  },
+  {
+    "id": 4,
+    "sun_sign": "Cancer",
+    "start_month": 6,
+    "start_day": 22,
+    "end_month": 7,
+    "end_day": 22,
+    "element": "Water",
+    "traits": "loyal, protective, moody"
+  },
+  {
+    "id": 5,
+    "sun_sign": "Leo",
+    "start_month": 7,
+    "start_day": 23,
+    "end_month": 8,
+    "end_day": 22,
+    "element": "Fire",
+    "traits": "creative, generous, domineering"
+  },
+  {
+    "id": 6,
+    "sun_sign": "Virgo",
+    "start_month": 8,
+    "start_day": 23,
+    "end_month": 9,
+    "end_day": 22,
+    "element": "Earth",
+    "traits": "analytical, hardworking, critical"
+  },
+  {
+    "id": 7,
+    "sun_sign": "Libra",
+    "start_month": 9,
+    "start_day": 23,
+    "end_month": 10,
+    "end_day": 23,
+    "element": "Air",
+    "traits": "diplomatic, cooperative, indecisive"
+  },
+  {
+    "id": 8,
+    "sun_sign": "Scorpio",
+    "start_month": 10,
+    "start_day": 24,
+    "end_month": 11,
+    "end_day": 21,
+    "element": "Water",
+    "traits": "passionate, resourceful, jealous"
+  },
+  {
+    "id": 9,
+    "sun_sign": "Sagittarius",
+    "start_month": 11,
+    "start_day": 22,
+    "end_month": 12,
+    "end_day": 21,
+    "element": "Fire",
+    "traits": "adventurous, honest, tactless"
+  },
+  {
+    "id": 10,
+    "sun_sign": "Capricorn",
+    "start_month": 12,
+    "start_day": 22,
+    "end_month": 1,
+    "end_day": 19,
+    "element": "Earth",
+    "traits": "disciplined, responsible, unforgiving"
+  },
+  {
+    "id": 11,
+    "sun_sign": "Aquarius",
+    "start_month": 1,
+    "start_day": 20,
+    "end_month": 2,
+    "end_day": 18,
+    "element": "Air",
+    "traits": "independent, intellectual, detached"
+  },
+  {
+    "id": 12,
+    "sun_sign": "Pisces",
+    "start_month": 2,
+    "start_day": 19,
+    "end_month": 3,
+    "end_day": 20,
+    "element": "Water",
+    "traits": "artistic, compassionate, escapist"
+  }
+]

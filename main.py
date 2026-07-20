@@ -1,6 +1,7 @@
 """The Atarian Calendar Converter takes a date input by 
 the user and returns the equivilant Atarian date"""
 
+from astrological_sign import BirthdayFacts
 from time_processor import AtarianConverter
 import pandas as pd
 
@@ -63,6 +64,10 @@ year = convert.determine_year()
 # 13. Find Guardian year
 guardian_year = convert.find_guardian_year(entered_date=parsed_user_date, dataframe=clean_dataframe)
 
+# ------------------------ #
+# Format date 
+# ------------------------ #
+
 # 14. Format the long date based on the Greenseat Calendar
 long_date = convert.format_date(day=day, month=month, season=season, year=year)
 
@@ -72,3 +77,17 @@ print(f"Long Date: {long_date}")
 chapter_head = convert.format_chapter_head_date(month=month, season=season, guardian_year=guardian_year, guardian=guardian, parsed_user_date=parsed_user_date)
 
 print(f"Chapter Head: {chapter_head}")
+
+# ------------------------- #
+# Character creation assist
+# ------------------------- #
+
+# 16. Based on the user's date, output a character's astrological sign if they were born on this date
+zodiac = BirthdayFacts(gregorian_date_string)
+
+# 17. Open the JSON file containing Zodiac data
+zodiac_signs = zodiac.open_json_file()
+
+# 18. Return the character's star sign
+zodiac.star_sign(zodiac_data=zodiac_signs)
+
