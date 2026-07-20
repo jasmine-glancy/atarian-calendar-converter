@@ -3,8 +3,6 @@
 from datetime import datetime
 import pandas as pd
 
-# TODO: Output next Atarian holiday +/- real world holiday
-
 class AtarianConverter:
     
     def __init__(self, gregorian_date_string):
@@ -201,11 +199,14 @@ class AtarianConverter:
                     full_guardian_name = guardian_label.split("'")
                     
                     deconstructed_guardian_name = full_guardian_name[0].split(" ")
-                    print(f"Guardian: {deconstructed_guardian_name[2]}")
+                    
+                    # # Debugging
+                    # print(f"Guardian: {deconstructed_guardian_name[2]}")
                     
                     guardian_era = f"Guardianship of {deconstructed_guardian_name[2].title()}"
                     
-                    print(f"This is the {guardian_era}!")
+                    # # Debugging 
+                    # print(f"This is the {guardian_era}!")
                     return guardian_era
                 except Exception as e:
                     print(f"Can't extract Guardian name. Exception: {e}")
@@ -251,20 +252,23 @@ class AtarianConverter:
             # 3. Process matches
             if not matched_rows.empty:
                 
-                print(matched_rows[["Label", "Start Year", "End Year"]])
-            
+                # # Debugging
+                # print(matched_rows[["Label", "Start Year", "End Year"]])
                 
                 # Get the current Guardian year based on the date the user entered
                 ## For example, If given the year 05-21-114, it should read Month 3 of the 9th Blooming Season 
                 
                 try:
-                    
-                    print(f"Start Year: {start_year}")
+                    # # Debugging 
+                    # print(f"Start Year: {start_year}")
                     start_year = int(start_year)
                     
                     # Find the difference between the user's Greenseat year and the start 
                         # year of the person who guards Ataria
-                    guardian_year = user_greenseat_year - start_year
+                    difference = user_greenseat_year - start_year
+                    
+                    # The program should never return the 0th year
+                    guardian_year = difference + 1
                     
                     # print(f"This is during the {guardian_year} guardian year")
                     
