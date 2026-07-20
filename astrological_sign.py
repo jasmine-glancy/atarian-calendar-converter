@@ -18,7 +18,7 @@ class BirthdayFacts:
         """Opens the JSON file and deserialize its content"""
         
         try:
-            dataframe = pd.read_json("sun_signs.json")
+            dataframe = pd.read_json("data/sun_signs.json")
         except Exception as e:
             print(f"Error: Exception {e}")
     

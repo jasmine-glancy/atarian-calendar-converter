@@ -17,7 +17,7 @@ class AtarianConverter:
         """Using pandas, extract the Date and End Dates"""
         
         # Read the world events
-        dataframe = pd.read_csv('world_calendar.csv', usecols=['Label', 'Date', 'End Date', 'Duration'])
+        dataframe = pd.read_csv('data/world_calendar.csv', usecols=['Label', 'Date', 'End Date', 'Duration'])
     
         return dataframe
     
